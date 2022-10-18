@@ -38,9 +38,9 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 
 void Renderer::Render(const Scene& scene, const Camera& camera)
 {
-	Ray ray;
-	ray.Origin = camera.GetPosition();
+
 	m_ActiveCamera = &camera;
+	m_ActiveScene = &scene;
 
 	// Height first is CPU cache friendly. 
 	for (uint32_t j = 0; j < m_FinalImage->GetHeight(); j++)
@@ -48,10 +48,9 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 		for (uint32_t i = 0; i < m_FinalImage->GetWidth(); i++)
 		{
 			// uv coord on screen
-			ray.Direction = camera.GetRayDirections()[i + j * m_FinalImage->GetWidth()];
 
 			// fills horizontally first, from bottom to top
-			glm::vec4 color = TraceRay(scene, ray);
+			glm::vec4 color = PerPixel(i, j);
 			color = glm::clamp(color, glm::vec4(0.0f), glm::vec4(1.0f));
 			m_ImageData[i + j * m_FinalImage->GetWidth()] = Utils::ConvertToRGBA(color);
 		}
@@ -60,7 +59,27 @@ void Renderer::Render(const Scene& scene, const Camera& camera)
 	m_FinalImage->SetData(m_ImageData);
 }
 
-glm::vec4 Renderer::TraceRay(const Scene& scene, const Ray& ray)
+
+
+glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
+{
+	Ray ray;
+	ray.Origin = m_ActiveCamera->GetPosition();
+	ray.Direction = m_ActiveCamera->GetRayDirections()[x + y * m_FinalImage->GetWidth()];
+	Renderer::HitPayload payload = TraceRay(ray);
+
+	if (payload.HitDistance < 0.0f)
+		return glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	glm::vec3 lightDirection = -glm::normalize(glm::vec3(1));
+	float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -lightDirection), 0.0f);
+
+	const Sphere& sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
+
+	return glm::vec4(sphere.Albedo * lightIntensity, 1.0f);
+}
+
+Renderer::HitPayload  Renderer::TraceRay(const Ray& ray)
 {
 	// ||v||^2 t^2 + 2 <u, v> t + (||u||^2- r^2) = 0
 	// u = ray origin 
@@ -68,15 +87,12 @@ glm::vec4 Renderer::TraceRay(const Scene& scene, const Ray& ray)
 	// r = radius
 	// t = hit distance
 
-	if (scene.Spheres.size() == 0)
-		return glm::vec4(0, 0, 0, 1);
+	int closestSphere = -1;
+	float hitDistance = FLT_MAX;
 
-	const Sphere* ClosestSphere = nullptr;
-	float HitDistance = FLT_MAX;
-
-	for (const Sphere& sphere : scene.Spheres)
+	for (size_t i = 0; i < m_ActiveScene->Spheres.size(); i++)
 	{
-
+		const Sphere& sphere = m_ActiveScene->Spheres[i];
 		glm::vec3 origin = ray.Origin - sphere.Position;
 
 		float a = glm::dot(ray.Direction, ray.Direction);
@@ -93,23 +109,40 @@ glm::vec4 Renderer::TraceRay(const Scene& scene, const Ray& ray)
 		// if hit, t = (-b +/- sqrt(discriminant)) / 2a
 		//float t1 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
 		float closestT = (-b - glm::sqrt(discriminant)) / (2.0f * a);
-		if (closestT < HitDistance)
+		if (closestT < hitDistance)
 		{
-			ClosestSphere = &sphere;
-			HitDistance = closestT;
+			closestSphere = (int)i;
+			hitDistance = closestT;
 		}
 	}
 
-	if (ClosestSphere == nullptr)
-		return glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (closestSphere < 0)
+		return Miss(ray);
 
-	glm::vec3 origin = ray.Origin - ClosestSphere->Position;
+	return ClosestHit(ray, hitDistance, closestSphere);
+}
 
-	glm::vec3 hitPoint = HitDistance * ray.Direction + origin;
-	glm::vec3 sphereNormal = glm::normalize(hitPoint );
 
-	glm::vec3 LightDirection = -glm::normalize(glm::vec3(1));
-	float LightIntensity = glm::max(glm::dot(sphereNormal, -  LightDirection), 0.0f);
+Renderer::HitPayload Renderer::ClosestHit(const Ray& ray, float hitDistacne, int objectIndex)
+{
+	Renderer::HitPayload payload;
+	payload.HitDistance = hitDistacne;
+	payload.ObjectIndex = objectIndex;
+	
+	const Sphere& closestSphere = m_ActiveScene->Spheres[objectIndex];
 
-	return glm::vec4(ClosestSphere->Albedo * LightIntensity, 1.0f);
+	glm::vec3 origin = ray.Origin - closestSphere.Position;
+
+	payload.WorldPosition = hitDistacne * ray.Direction + origin;
+	payload.WorldNormal = glm::normalize(payload.WorldPosition);
+	payload.WorldPosition += closestSphere.Position;
+
+	return payload;
+}
+
+Renderer::HitPayload Renderer::Miss(const Ray& ray)
+{
+	Renderer::HitPayload payload;
+	payload.HitDistance = -1.0f;
+	return payload;
 }
