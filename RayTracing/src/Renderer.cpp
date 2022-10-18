@@ -35,8 +35,11 @@ void Renderer::OnResize(uint32_t width, uint32_t height)
 }
 
 
-void Renderer::Render()
+void Renderer::Render(const Camera& camera)
 {
+	//const glm::vec3& rayOrigin = camera.GetPosition();
+	m_ActiveCamera = &camera;
+
 	// Height first is CPU cache friendly. 
 	for (uint32_t j = 0; j < m_FinalImage->GetHeight(); j++)
 	{
@@ -45,6 +48,7 @@ void Renderer::Render()
 			// uv coord on screen
 			glm::vec2 coord = { (float)i / (float)m_FinalImage->GetWidth(), (float)j / (float)m_FinalImage->GetHeight() };
 			coord = coord * 2.0f - 1.0f; // scales to (-1, 1)
+			//const glm::vec3& rayDirection = camera.GetRayDirections()[i + j * m_FinalImage->GetWidth()];
 
 			// fills horizontally first, from bottom to top
 			glm::vec4 color = PerPixel(coord);
@@ -58,9 +62,6 @@ void Renderer::Render()
 
 glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 {
-	uint8_t r = (uint8_t)(coord.x * 255.0f);
-	uint8_t g = (uint8_t)(coord.y * 255.0f);
-
 	// ||v||^2 t^2 + 2 <u, v> t + (||u||^2- r^2) = 0
 	// u = ray origin 
 	// v = ray direction
@@ -68,8 +69,13 @@ glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 	// t = hit distance
 
 	// coord is the ray dir
-	glm::vec3 rayOrigin(0.0f, 0.0f, 1.0f);
+	//glm::vec3 rayOrigin(0.0f, 0.0f, 1.0f);
 	glm::vec3 rayDirection(coord.x, coord.y, -1.0f);
+	 
+	glm::vec3 rayOrigin = m_ActiveCamera->GetPosition();
+	//glm::vec3 rayDirection = m_ActiveCamera->GetRayDirections();
+
+
 	float radius = 0.5f;
 
 	//rayDirection = glm::normalize(rayDirection);
