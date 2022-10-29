@@ -1,6 +1,6 @@
 # Ray Tracing
 
-This is a simple implementation of a Ray Tracing renderer using [Walnut](https://github.com/TheCherno/Walnut) template developed by [TheCherno](https://github.com/TheCherno), following his Ray Tracing series.
+This is a simple implementation of a Ray Tracing renderer using [Walnut](https://github.com/TheCherno/Walnut) template developed by [TheCherno](https://github.com/TheCherno).
 
 ![Screenshot](./RayTracing/img/RayTracingScreenshot.png?raw=true)
 
