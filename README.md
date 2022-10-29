@@ -2,6 +2,9 @@
 
 This is a simple implementation of a Ray Tracing renderer using [Walnut](https://github.com/TheCherno/Walnut) template developed by [TheCherno](https://github.com/TheCherno), following his Ray Tracing series.
 
+![Screenshot](https://github.com/timmats/RayTracing/img/RayTracingScreenshot.png)
+
+
 ## Getting Started
 Once you've installed [Visual Studio 2022](https://visualstudio.com) and [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows), clone this repository and run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files. Your app is located in the `RayTracing/` directory.
 
