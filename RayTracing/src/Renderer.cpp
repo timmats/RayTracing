@@ -71,7 +71,7 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 
 	float multiplier = 1.0f;
 
-	int bounces = 2;
+	int bounces = 4;
 	for (int i = 0; i < bounces; i++)
 	{
 		Renderer::HitPayload payload = TraceRay(ray);

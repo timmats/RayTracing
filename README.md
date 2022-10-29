@@ -1,6 +1,14 @@
-# Walnut App Template
+# Ray Tracing
 
-This is a simple app template for [Walnut](https://github.com/TheCherno/Walnut) - unlike the example within the Walnut repository, this keeps Walnut as an external submodule and is much more sensible for actually building applications. See the [Walnut](https://github.com/TheCherno/Walnut) repository for more details.
+This is a simple implementation of a Ray Tracing renderer using [Walnut](https://github.com/TheCherno/Walnut) template developed by [TheCherno](https://github.com/TheCherno), following his Ray Tracing series.
 
 ## Getting Started
-Once you've cloned, you can customize the `premake5.lua` and `WalnutApp/premake5.lua` files to your liking (eg. change the name from "WalnutApp" to something else).  Once you're happy, run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files. Your app is located in the `WalnutApp/` directory, which some basic example code to get you going in `WalnutApp/src/WalnutApp.cpp`. I recommend modifying that WalnutApp project to create your own application, as everything should be setup and ready to go.
+Once you've installed [Visual Studio 2022](https://visualstudio.com) and [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows), clone this repository and run `scripts/Setup.bat` to generate Visual Studio 2022 solution/project files. Your app is located in the `RayTracing/` directory.
+
+
+### 3rd party libaries
+- [Dear ImGui](https://github.com/ocornut/imgui)
+- [GLFW](https://github.com/glfw/glfw)
+- [stb_image](https://github.com/nothings/stb)
+- [GLM](https://github.com/g-truc/glm) (included for convenience)
+
