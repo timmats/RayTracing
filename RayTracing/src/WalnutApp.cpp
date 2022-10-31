@@ -49,6 +49,7 @@ public:
 	virtual void OnUIRender() override
 	{
 		ImGui::Begin("Setting");
+
 		ImGui::Text("Last Render: %.3fms", m_LastRenderTime);
 		if (ImGui::Button("Render"))
 		{
@@ -58,12 +59,12 @@ public:
 
 		ImGui::Begin("Scene");
 
+		ImGui::Begin("Spheres");
+
 		if (ImGui::Button("Add Sphere"))
 		{
 			{
 				Sphere sphere;
-				sphere.Position;
-				sphere.Radius;
 				m_Scene.Spheres.push_back(sphere);
 			}
 		}
@@ -86,6 +87,22 @@ public:
 			ImGui::Separator();
 			ImGui::PopID();
 		}
+
+		ImGui::End();
+		ImGui::Begin("Material");
+		if (ImGui::Button("Add Material"))
+		{
+			{
+				Material material;
+				m_Scene.Materials.push_back(material);
+			}
+		}
+
+		//if (ImGui::Button("Delete Material") && m_Scene.Materials.size() > 0)
+		//{
+		//	m_Scene.Materials.pop_back();
+		//}
+
 		for (size_t i = 0; i < m_Scene.Materials.size(); i++)
 		{
 			ImGui::PushID(i);
@@ -99,6 +116,7 @@ public:
 			ImGui::PopID();
 		}
 
+		ImGui::End();
 
 		ImGui::End();
 

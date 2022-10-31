@@ -27,6 +27,7 @@ private:
 
 		int ObjectIndex;
 	};
+
 	glm::vec4 PerPixel(uint32_t x, uint32_t y); //RayGen
 
 	HitPayload TraceRay(const Ray& ray);
