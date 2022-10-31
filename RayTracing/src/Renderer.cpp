@@ -78,8 +78,8 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 
 		if (payload.HitDistance < 0.0f)
 		{
-			glm::vec3 skycolor =  glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-			color + skycolor * multiplier;
+			glm::vec3 skycolor =  glm::vec3(0.6f, 0.7f, 0.9f);
+			color += skycolor * multiplier;
 			break;
 		}
 
@@ -87,12 +87,14 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 		float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -lightDirection), 0.0f);
 
 		const Sphere& sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
-		color += multiplier * sphere.Albedo * lightIntensity;
+		const Material& material = m_ActiveScene->Materials[sphere.MaterialIndex];
+		color += multiplier * material.Albedo * lightIntensity;
 
-		multiplier *= 0.9;
+		multiplier *= 0.5f;
 
 		ray.Origin = payload.WorldPosition + 0.0001f * payload.WorldNormal;
-		ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal);
+		ray.Direction = glm::reflect(ray.Direction, 
+			payload.WorldNormal + material.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
 	}
 
 	return glm::vec4(color, 1.0f);
