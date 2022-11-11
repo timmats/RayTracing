@@ -92,7 +92,9 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 
 		if (payload.HitDistance < 0.0f)
 		{
-			glm::vec3 skycolor =  glm::vec3(0.6f, 0.7f, 0.9f);
+			// gradient background
+			float t = 0.5f * (ray.Direction.y + 1.0);
+			glm::vec3 skycolor = (1 - t) * glm::vec3(1.0f) + t * glm::vec3(0.6f, 0.7f, 0.9f);
 			color += skycolor * multiplier;
 			break;
 		}
@@ -109,7 +111,7 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 
 		ray.Origin = payload.WorldPosition + 0.0001f * payload.WorldNormal;
 		ray.Direction = glm::reflect(ray.Direction, 
-			payload.WorldNormal + material.Roughness * Walnut::Random::Vec3(-0.5f, 0.5f));
+			payload.WorldNormal + material.Roughness * Walnut::Random::InUnitSphere() * Walnut::Random::Float());
 	}
 
 	return glm::vec4(color, 1.0f);
@@ -123,7 +125,7 @@ Renderer::HitPayload  Renderer::TraceRay(const Ray& ray)
 	// r = radius
 	// t = hit distance
 
-	int closestSphere = -1;
+	int closestObjectIndex = -1;
 	float hitDistance = FLT_MAX;
 
 	for (size_t i = 0; i < m_ActiveScene->Spheres.size(); i++)
@@ -145,17 +147,19 @@ Renderer::HitPayload  Renderer::TraceRay(const Ray& ray)
 		// if hit, t = (-b +/- sqrt(discriminant)) / 2a
 		//float t1 = (-b + glm::sqrt(discriminant)) / (2.0f * a);
 		float closestT = (-b - glm::sqrt(discriminant)) / (2.0f * a);
+
+
 		if (closestT > 0.0f && closestT < hitDistance)
 		{
-			closestSphere = (int)i;
+			closestObjectIndex = (int)i;
 			hitDistance = closestT;
 		}
 	}
 
-	if (closestSphere < 0)
+	if (closestObjectIndex < 0)
 		return Miss(ray);
 
-	return ClosestHit(ray, hitDistance, closestSphere);
+	return ClosestHit(ray, hitDistance, closestObjectIndex);
 }
 
 

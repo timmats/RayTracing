@@ -5,6 +5,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "Walnut/Input/Input.h"
+#include "Walnut/Random.h"
 
 using namespace Walnut;
 
@@ -127,7 +128,9 @@ void Camera::RecalculateRayDirections()
 	{
 		for (uint32_t x = 0; x < m_ViewportWidth; x++)
 		{
-			glm::vec2 coord = { (float)x / (float)m_ViewportWidth, (float)y / (float)m_ViewportHeight };
+			// Antialiasing
+			glm::vec2 coord = { ((float)x + Walnut::Random::Float(0, 1)) / (float)m_ViewportWidth, 
+				((float)y + Walnut::Random::Float(0, 1)) / (float)m_ViewportHeight};
 			coord = coord * 2.0f - 1.0f; // -1 -> 1
 
 			glm::vec4 target = m_InverseProjection * glm::vec4(coord.x, coord.y, 1, 1);

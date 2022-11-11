@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <glm/glm.hpp>
+//#include "Sphere.cpp"
 
 struct Material
 {
@@ -14,9 +15,9 @@ struct Sphere
 {
 	float Radius = 0.5f;
 	glm::vec3 Position{0.0f, 0.0f, 0.0f};
-	glm::vec3 Velocity{ 0.0f };
-	glm::vec3 Force{ 0.0f };
-	float Mass = 1;
+	//glm::vec3 Velocity{ 0.0f };
+	//glm::vec3 Force{ 0.0f };
+	//float Mass = 1;
 
 	int MaterialIndex = 0;
 };
