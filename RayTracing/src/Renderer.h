@@ -10,6 +10,7 @@
 
 class Renderer
 {
+
 public:
 	struct Settings
 	{
@@ -40,6 +41,7 @@ private:
 	HitPayload ClosestHit(const Ray& ray, float hitDistacne, int objectIndex);
 	HitPayload Miss(const Ray& ray);
 private:
+	Settings m_Settings;
 	std::shared_ptr<Walnut::Image> m_FinalImage;
 	const Camera* m_ActiveCamera = nullptr;
 	const Scene* m_ActiveScene = nullptr;
@@ -47,6 +49,6 @@ private:
 	uint32_t* m_ImageData = nullptr;
 	glm::vec4* m_AccumulationData = nullptr;
 
-	Settings& m_Settings;
 	uint32_t m_FrameIndex = 1;
+
 };
