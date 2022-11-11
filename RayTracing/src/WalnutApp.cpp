@@ -6,7 +6,7 @@
 
 #include "Renderer.h"
 #include "Camera.h"
-#include "PhysicsWorld.h"
+//#include "PhysicsWorld.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -32,7 +32,7 @@ public:
 			sphere.Radius = 1.0f;
 			sphere.MaterialIndex = 0;
 			m_Scene.Spheres.push_back(sphere);
-			m_PhysicsWorld.AddSphere(&sphere);
+			//m_PhysicsWorld.AddSphere(&sphere);
 		}
 
 		{
@@ -41,12 +41,14 @@ public:
 			sphere.Radius = 100.0f;
 			sphere.MaterialIndex = 1;
 			m_Scene.Spheres.push_back(sphere);
-			m_PhysicsWorld.AddSphere(&sphere);
+			//m_PhysicsWorld.AddSphere(&sphere);
 		}
 	}
+
 	virtual void OnUpdate(float ts) override
 	{
-		m_Camera.OnUpdate(ts);
+		if (m_Camera.OnUpdate(ts))
+			m_Renderer.ResetFrameIndex();
 	}
 
 	virtual void OnUIRender() override
@@ -58,6 +60,14 @@ public:
 		{
 			Render();
 		}
+
+		ImGui::Checkbox("Accumulate", &m_Renderer.GetSettings().Accumulate);
+
+		if (ImGui::Button("Reset"))
+		{
+			m_Renderer.ResetFrameIndex();
+		}
+
 		ImGui::End();
 
 		ImGui::Begin("Scene");
@@ -69,14 +79,14 @@ public:
 			{
 				Sphere sphere;
 				m_Scene.Spheres.push_back(sphere);
-				m_PhysicsWorld.AddSphere(&sphere);
+				//m_PhysicsWorld.AddSphere(&sphere);
 			}
 		}
 
 		if (ImGui::Button("Delete Sphere") && m_Scene.Spheres.size() > 0)
 		{
 			m_Scene.Spheres.pop_back();
-			m_PhysicsWorld.PopSphere();
+			//m_PhysicsWorld.PopSphere();
 		}
 
 		for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
@@ -147,7 +157,7 @@ public:
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Renderer.Render(m_Scene, m_Camera);
-		m_PhysicsWorld.Step(timer.Elapsed());
+		//m_PhysicsWorld.Step(timer.Elapsed());
 		
 		m_LastRenderTime = timer.ElapsedMillis();
 	}
@@ -156,7 +166,7 @@ private:
 	Renderer m_Renderer;
 	Camera m_Camera;
 	Scene m_Scene;
-	PhysicsWorld m_PhysicsWorld;
+	//PhysicsWorld m_PhysicsWorld;
 
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 	float m_LastRenderTime = 0.0f;
