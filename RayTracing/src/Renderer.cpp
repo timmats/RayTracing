@@ -84,7 +84,7 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 		}
 
 		// light source origin - sphere origin(= 0 bcz camera position is shifted)
-		glm::vec3 lightDirection = -glm::normalize(glm::vec3(1) - glm::vec3(0)); 
+		glm::vec3 lightDirection = -glm::normalize(glm::vec3(1)); 
 		float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -lightDirection), 0.0f);
 
 		const Sphere& sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
