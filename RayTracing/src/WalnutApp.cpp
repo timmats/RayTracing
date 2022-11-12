@@ -118,6 +118,10 @@ public:
 		//	m_Scene.Materials.pop_back();
 		//}
 
+		static const char* MaterialTypes[]{ "Lmbert", "Metal", "Dielectric" };
+		static bool selected[3];
+		static std::string preview = "";
+
 		for (size_t i = 0; i < m_Scene.Materials.size(); i++)
 		{
 			ImGui::PushID(i);
@@ -126,6 +130,8 @@ public:
 			ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 0.0f, 1.0f);
 			ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
 			ImGui::ColorEdit3("Albedo", glm::value_ptr(material.Albedo));
+
+			ImGui::DragInt("Type", &material.type, 0.1f, 0, 2);
 			
 			ImGui::Separator();
 			ImGui::PopID();

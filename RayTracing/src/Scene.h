@@ -6,9 +6,15 @@
 
 struct Material
 {
+	enum Type
+	{
+		Lmbert = 0, Metal, Dielectric
+	};
+	int type = Type::Dielectric;
 	glm::vec3 Albedo{ 1.0f };
 	float Roughness = 0.01f;
 	float Metallic = 0.5f;
+	float RefractiveIndex = 1.5f;
 };
 
 struct Sphere
@@ -24,6 +30,7 @@ struct Sphere
 
 struct Scene
 {
+	
 	std::vector<Sphere> Spheres;
 	std::vector<Material> Materials;
 };
