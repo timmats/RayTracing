@@ -35,7 +35,7 @@ void PhysicsWorld::DequanLi(Scene& scene, const float dt)
 
 	for (size_t i = 0; i < m_Scene->Spheres.size(); i++)
 	{
-		Sphere* sphere = &scene.Spheres[i];
+		Sphere* sphere = &m_Scene->Spheres[i];
 		if (sphere->Dynamic)
 		{
 			//sphere->Force += sphere->Mass * m_gravity;

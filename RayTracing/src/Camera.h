@@ -11,7 +11,7 @@ public:
 	bool OnUpdate(float ts);
 	void OnResize(uint32_t width, uint32_t height);
 
-	void setPosition(glm::vec3 pos);
+	void setPosition(const glm::vec3 pos);
 
 	const glm::mat4& GetProjection() const { return m_Projection; }
 	const glm::mat4& GetInverseProjection() const { return m_InverseProjection; }

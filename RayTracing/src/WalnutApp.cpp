@@ -3,6 +3,7 @@
 
 #include "Walnut/Image.h"
 #include "Walnut/Timer.h"
+#include "Walnut/Random.h"
 
 #include "Renderer.h"
 //#include "Camera.h"
@@ -18,40 +19,17 @@ public:
 	ExampleLayer()
 		: m_Camera(45.0f, 0.1f, 100.0f)
 	{
-		Material& MetalSphere = m_Scene.Materials.emplace_back();
-		MetalSphere.Albedo = { 1.0f, 0.0f, 1.0f };
-		MetalSphere.Roughness = 0.0f;
-
-		Material& LambertSphere = m_Scene.Materials.emplace_back();
-		LambertSphere.Albedo = { 0.2f, 0.3f, 1.0f };
-		LambertSphere.Roughness = 0.1f;
-
-		Material& DielectricSphere = m_Scene.Materials.emplace_back();
-		DielectricSphere.Albedo = { 0.2f, 0.3f, 1.0f };
-		DielectricSphere.Roughness = 0.0f;
-		DielectricSphere.type = Material::Type::Dielectric;
-
-		{
-			Sphere sphere;
-			sphere.Position = { 0.0f, -101.0f, 0.0f };
-			sphere.Radius = 100.0f;
-			sphere.MaterialIndex = 1;
-			m_Scene.AddSphere(sphere);
-		}
-
-		{
-			Sphere sphere;
-			sphere.Position = { 0.8f, 0.0f, 0.0f };
-			sphere.Radius = 1.0f;
-			sphere.MaterialIndex = 0;
-			m_Scene.AddSphere(sphere);
-		}
+		InitializeWorld();
+		
 	}
 
 	virtual void OnUpdate(float ts) override
 	{
 		if (m_Camera.OnUpdate(ts))
 			m_Renderer.ResetFrameIndex();
+
+		m_physics.DequanLi(m_Scene, 0.01f * ts);
+
 	}
 
 	virtual void OnUIRender() override
@@ -71,9 +49,20 @@ public:
 			m_Renderer.ResetFrameIndex();
 		}
 
+		if (ImGui::Button("Initialize"))
+		{
+			InitializeWorld();
+			m_Camera.setPosition(glm::vec3(0, 0, 6));
+
+		}
+		if (ImGui::Button("CHAOS"))
+		{
+			Chaos(3, 100.0f);
+			m_Camera.setPosition(glm::vec3(0, 0, 400));
+		}
+
 		ImGui::End();
 
-		ImGui::Begin("Scene");
 
 		ImGui::Begin("Spheres");
 
@@ -81,10 +70,9 @@ public:
 		{
 			{
 				Sphere sphere;
-				sphere.Dynamic = true;
+				sphere.Dynamic = false;
 				sphere.MaterialIndex = 2;
 				sphere.Position = { 0.349f, 0.0f, -0.16f };
-				sphere.Radius = 0.1f;
 				m_Scene.AddSphere(sphere);
 			}
 		}
@@ -102,7 +90,7 @@ public:
 			Sphere& sphere = m_Scene.Spheres[i];
 			ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1f);
 			ImGui::DragFloat("Radius", &sphere.Radius, 0.1f);
-			ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0.0f, (int)m_Scene.Materials.size() - 1);
+			ImGui::DragInt("Material", &sphere.MaterialIndex, 0.1f, 0.0f, (int)m_Scene.Materials.size() - 1);
 			ImGui::Checkbox("Dynamic", &sphere.Dynamic);
 
 			ImGui::Separator();
@@ -124,10 +112,6 @@ public:
 		//	m_Scene.Materials.pop_back();
 		//}
 
-		static const char* MaterialTypes[]{ "Lmbert", "Metal", "Dielectric" };
-		static bool selected[3];
-		static std::string preview = "";
-
 		for (size_t i = 0; i < m_Scene.Materials.size(); i++)
 		{
 			ImGui::PushID(i);
@@ -143,7 +127,6 @@ public:
 			ImGui::PopID();
 		}
 
-		ImGui::End();
 
 		ImGui::End();
 
@@ -169,9 +152,88 @@ public:
 
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
-		m_physics.DequanLi(m_Scene, 1.0f * timer.ElapsedMillis());
+		//m_physics.DequanLi(m_Scene, 1.0f * timer.ElapsedMillis());
 		m_Renderer.Render(m_Scene, m_Camera);
 		m_LastRenderTime = timer.ElapsedMillis();
+	}
+
+	void Chaos(int N_spheres, float scale)
+	{
+		m_Scene.Spheres.clear();
+		{
+			Sphere sphere;
+			sphere.Position = { 0.0f, -1110.0f, 0.0f };
+			sphere.Radius = 1000.0f;
+			sphere.MaterialIndex = 1;
+			m_Scene.AddSphere(sphere);
+		}
+
+
+		for (size_t i = 1; i < 1 + N_spheres; i++)
+		{
+			for (size_t j = 1; j < 1 + N_spheres; j++)
+			{
+				for (size_t k = 1; k < 1 + N_spheres; k++)
+				{
+					Sphere sphere;
+				/*	sphere.Position = glm::vec3( i / N_spheres, j / N_spheres, k / N_spheres ) 
+						+ Walnut::Random::Vec3(0, 1 / N_spheres);*/
+					sphere.Position = scale * Walnut::Random::Vec3(-1, 1 );
+					//sphere.Position = { 0.349f, 0.0f, -0.16f };
+					//sphere.Radius = scale / (2 * N_spheres);
+					sphere.Radius = scale/10;
+					sphere.MaterialIndex = 2;
+					sphere.Dynamic = true;
+					m_Scene.AddSphere(sphere);
+				}
+			}
+		}
+
+		m_Renderer.ResetFrameIndex();
+	}
+
+	void InitializeWorld()
+	{
+		m_Scene.Spheres.clear();
+		m_Scene.Materials.clear();
+		
+		{
+			Material& LambertSphere = m_Scene.Materials.emplace_back();
+			LambertSphere.Albedo = { 0.8f, 0.0f, 0.8f };
+			LambertSphere.Roughness = 0.1f;
+			LambertSphere.type = Material::Type::Lmbert;
+
+			Material& MetalSphere = m_Scene.Materials.emplace_back();
+			MetalSphere.Albedo = { 0.2f, 0.3f, 1.0f };
+			MetalSphere.Roughness = 0.0f;
+			MetalSphere.type = Material::Type::Metal;
+
+			Material& DielectricSphere = m_Scene.Materials.emplace_back();
+			DielectricSphere.Albedo = { 0.2f, 0.3f, 1.0f };
+			DielectricSphere.Roughness = 0.0f;
+			DielectricSphere.type = Material::Type::Dielectric;
+
+		}
+
+
+		{
+			Sphere sphere;
+			sphere.Position = { 0.0f, -101.0f, 0.0f };
+			sphere.Radius = 100.0f;
+			sphere.MaterialIndex = 1;
+			m_Scene.AddSphere(sphere);
+		}
+
+		{
+			Sphere sphere;
+			sphere.Position = { 0.8f, 0.0f, 0.0f };
+			sphere.Radius = 1.0f;
+			sphere.MaterialIndex = 0;
+			m_Scene.AddSphere(sphere);
+		}
+
+		//m_Camera.setPosition(glm::vec3(0, 0, 6));
+		m_Renderer.ResetFrameIndex();
 	}
 
 private:

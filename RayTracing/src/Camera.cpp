@@ -141,3 +141,11 @@ void Camera::RecalculateRayDirections()
 		}
 	}
 }
+
+void Camera::setPosition(const glm::vec3 pos)
+{
+	m_Position = pos;
+
+	RecalculateProjection();
+	RecalculateRayDirections();
+}

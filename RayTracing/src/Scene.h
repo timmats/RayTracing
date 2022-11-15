@@ -12,14 +12,14 @@ struct Material
 	};
 	int type = Type::Lmbert;
 	glm::vec3 Albedo{ 1.0f };
-	float Roughness = 0.01f;
+	float Roughness = 0.0f;
 	float Metallic = 0.5f;
 	float RefractiveIndex = 1.5f;
 };
 
 struct Sphere
 {
-	float Radius = 0.5f;
+	float Radius = 1.0f;
 	glm::vec3 Position{0.0f, 0.0f, 0.0f};
 	glm::vec3 Velocity{ 0.0f };
 	glm::vec3 Force{ 0.0f };
