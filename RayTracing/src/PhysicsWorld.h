@@ -7,7 +7,8 @@ class PhysicsWorld
 public:
 	PhysicsWorld() = default;
 
-	void simulate(Scene& scene, const float dt);
+	void simulate_Gravity(Scene& scene, const float dt);
+	void DequanLi(Scene& scene, const float dt);
 
 private:
 	Scene* m_Scene = nullptr;

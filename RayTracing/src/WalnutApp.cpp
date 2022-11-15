@@ -33,17 +33,17 @@ public:
 
 		{
 			Sphere sphere;
-			sphere.Position = { 0.8f, 0.0f, 0.0f };
-			sphere.Radius = 1.0f;
-			sphere.MaterialIndex = 0;
+			sphere.Position = { 0.0f, -101.0f, 0.0f };
+			sphere.Radius = 100.0f;
+			sphere.MaterialIndex = 1;
 			m_Scene.AddSphere(sphere);
 		}
 
 		{
 			Sphere sphere;
-			sphere.Position = { 0.0f, -101.0f, 0.0f };
-			sphere.Radius = 100.0f;
-			sphere.MaterialIndex = 1;
+			sphere.Position = { 0.8f, 0.0f, 0.0f };
+			sphere.Radius = 1.0f;
+			sphere.MaterialIndex = 0;
 			m_Scene.AddSphere(sphere);
 		}
 	}
@@ -83,7 +83,8 @@ public:
 				Sphere sphere;
 				sphere.Dynamic = true;
 				sphere.MaterialIndex = 2;
-				sphere.Position = { 2.5, 5.0f, 0 };
+				sphere.Position = { 0.349f, 0.0f, -0.16f };
+				sphere.Radius = 0.1f;
 				m_Scene.AddSphere(sphere);
 			}
 		}
@@ -102,7 +103,7 @@ public:
 			ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1f);
 			ImGui::DragFloat("Radius", &sphere.Radius, 0.1f);
 			ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0.0f, (int)m_Scene.Materials.size() - 1);
-			
+			ImGui::Checkbox("Dynamic", &sphere.Dynamic);
 
 			ImGui::Separator();
 			ImGui::PopID();
@@ -168,11 +169,8 @@ public:
 
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
-
-		m_physics.simulate(m_Scene, 100.0f * timer.ElapsedMillis());
-
+		m_physics.DequanLi(m_Scene, 1.0f * timer.ElapsedMillis());
 		m_Renderer.Render(m_Scene, m_Camera);
-		
 		m_LastRenderTime = timer.ElapsedMillis();
 	}
 
@@ -180,7 +178,6 @@ private:
 	Renderer m_Renderer;
 	Camera m_Camera;
 	Scene m_Scene;
-
 	PhysicsWorld m_physics;
 
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
