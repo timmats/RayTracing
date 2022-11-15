@@ -25,6 +25,7 @@ struct Sphere
 	glm::vec3 Force{ 0.0f };
 	float Mass = 1;
 
+	bool Dynamic = false;
 	int MaterialIndex = 0;
 };
 

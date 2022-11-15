@@ -2,12 +2,12 @@
 
 #include "Hittable.h"
 
-class Sphere : Hittable
+class ASphere : Hittable
 {
 public:
-	Sphere() {};
+	ASphere() {};
 
-	Sphere(glm::vec3 pos, float radius) : Radius(radius) { Position = pos; }
+	ASphere(glm::vec3 pos, float radius) : Radius(radius) { Position = pos; }
 
 	virtual void Hit(Ray& ray, Hit_Status& status) const override;
 public:
@@ -19,7 +19,7 @@ public:
 private:
 };
 
-void Sphere::Hit(Ray& ray, Hit_Status& status) const{
+void ASphere::Hit(Ray& ray, Hit_Status& status) const{
 	glm::vec3 origin = ray.Origin - Position;
 
 	float a = glm::dot(ray.Direction, ray.Direction);

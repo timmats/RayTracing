@@ -6,6 +6,7 @@
 
 #include "Renderer.h"
 //#include "Camera.h"
+#include "PhysicsWorld.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -17,13 +18,18 @@ public:
 	ExampleLayer()
 		: m_Camera(45.0f, 0.1f, 100.0f)
 	{
-		Material& pinkSphere = m_Scene.Materials.emplace_back();
-		pinkSphere.Albedo = { 1.0f, 0.0f, 1.0f };
-		pinkSphere.Roughness = 0.0f;
+		Material& MetalSphere = m_Scene.Materials.emplace_back();
+		MetalSphere.Albedo = { 1.0f, 0.0f, 1.0f };
+		MetalSphere.Roughness = 0.0f;
 
-		Material& blueSphere = m_Scene.Materials.emplace_back();
-		blueSphere.Albedo = { 0.2f, 0.3f, 1.0f };
-		blueSphere.Roughness = 0.1f;
+		Material& LambertSphere = m_Scene.Materials.emplace_back();
+		LambertSphere.Albedo = { 0.2f, 0.3f, 1.0f };
+		LambertSphere.Roughness = 0.1f;
+
+		Material& DielectricSphere = m_Scene.Materials.emplace_back();
+		DielectricSphere.Albedo = { 0.2f, 0.3f, 1.0f };
+		DielectricSphere.Roughness = 0.0f;
+		DielectricSphere.type = Material::Type::Dielectric;
 
 		{
 			Sphere sphere;
@@ -75,6 +81,9 @@ public:
 		{
 			{
 				Sphere sphere;
+				sphere.Dynamic = true;
+				sphere.MaterialIndex = 2;
+				sphere.Position = { 2.5, 5.0f, 0 };
 				m_Scene.AddSphere(sphere);
 			}
 		}
@@ -149,6 +158,7 @@ public:
 
 		ImGui::End();
 
+
 		Render();
 	}
 
@@ -158,6 +168,9 @@ public:
 
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
+
+		m_physics.simulate(m_Scene, 100.0f * timer.ElapsedMillis());
+
 		m_Renderer.Render(m_Scene, m_Camera);
 		
 		m_LastRenderTime = timer.ElapsedMillis();
@@ -167,6 +180,8 @@ private:
 	Renderer m_Renderer;
 	Camera m_Camera;
 	Scene m_Scene;
+
+	PhysicsWorld m_physics;
 
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 	float m_LastRenderTime = 0.0f;
