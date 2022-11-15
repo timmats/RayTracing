@@ -36,6 +36,7 @@ private:
 	};
 
 	glm::vec4 PerPixel(uint32_t x, uint32_t y); //RayGen
+	void Scatter(Ray& ray, const Material& material, const HitPayload& payload, glm::vec3& color, float& multiplier);
 
 	HitPayload TraceRay(const Ray& ray);
 	HitPayload ClosestHit(const Ray& ray, float hitDistacne, int objectIndex);

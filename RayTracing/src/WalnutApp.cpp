@@ -6,7 +6,6 @@
 
 #include "Renderer.h"
 //#include "Camera.h"
-//#include "PhysicsWorld.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -31,8 +30,7 @@ public:
 			sphere.Position = { 0.8f, 0.0f, 0.0f };
 			sphere.Radius = 1.0f;
 			sphere.MaterialIndex = 0;
-			m_Scene.Spheres.push_back(sphere);
-			//m_PhysicsWorld.AddSphere(&sphere);
+			m_Scene.AddSphere(sphere);
 		}
 
 		{
@@ -40,8 +38,7 @@ public:
 			sphere.Position = { 0.0f, -101.0f, 0.0f };
 			sphere.Radius = 100.0f;
 			sphere.MaterialIndex = 1;
-			m_Scene.Spheres.push_back(sphere);
-			//m_PhysicsWorld.AddSphere(&sphere);
+			m_Scene.AddSphere(sphere);
 		}
 	}
 
@@ -78,15 +75,14 @@ public:
 		{
 			{
 				Sphere sphere;
-				m_Scene.Spheres.push_back(sphere);
-				//m_PhysicsWorld.AddSphere(&sphere);
+				m_Scene.AddSphere(sphere);
 			}
 		}
 
 		if (ImGui::Button("Delete Sphere") && m_Scene.Spheres.size() > 0)
 		{
+			//m_Scene.RemoveSphere(m_Scene.Spheres[0]);
 			m_Scene.Spheres.pop_back();
-			//m_PhysicsWorld.PopSphere();
 		}
 
 		for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
@@ -163,7 +159,6 @@ public:
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
 		m_Renderer.Render(m_Scene, m_Camera);
-		//m_PhysicsWorld.Step(timer.Elapsed());
 		
 		m_LastRenderTime = timer.ElapsedMillis();
 	}
@@ -172,7 +167,6 @@ private:
 	Renderer m_Renderer;
 	Camera m_Camera;
 	Scene m_Scene;
-	//PhysicsWorld m_PhysicsWorld;
 
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 	float m_LastRenderTime = 0.0f;

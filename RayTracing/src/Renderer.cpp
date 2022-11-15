@@ -106,69 +106,82 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 		const Sphere& sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
 		const Material& material = m_ActiveScene->Materials[sphere.MaterialIndex];
 		
-
-
-		if (material.type == Material::Type::Dielectric)
-		{
-			//color = glm::vec3(1);
-			glm::vec3 out_normal;
-			float Refraction;
-			float cosine = glm::dot(ray.Direction, payload.WorldNormal);
-			float prob;
-
-			//if (glm::distance(ray.Origin, payload.WorldPosition) > sphere.Radius)
-			if (cosine > 0.0f)
-			{
-				Refraction = material.RefractiveIndex;
-				out_normal = -payload.WorldNormal;
-				cosine *= Refraction;
-			}
-			else
-			{
-				Refraction = 1.0f / material.RefractiveIndex;
-				cosine *= -1;
-				out_normal = payload.WorldNormal;
-
-			}
-
-			glm::vec3 refractDir = glm::refract(ray.Direction, payload.WorldNormal, Refraction);
-
-			if (glm::length(refractDir) > 0)
-			{
-				float r = material.RefractiveIndex;
-				r = (1 - r) / (1 + r);
-				r *= r;
-				prob = r + (1 - r) * powf(1 - cosine, 5);
-			}
-			else
-				prob = 1.0f;
-
-			if (Walnut::Random::Float(0.0f, 1.0f) < prob)
-				ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal);
-			else
-				ray.Direction = refractDir;
-
-			ray.Origin = payload.WorldPosition + 0.0001f * ray.Direction;
-			continue;
-		}
-		else if (material.type == Material::Type::Metal)
-		{
-			ray.Direction = glm::reflect(ray.Direction, 
-				payload.WorldNormal + material.Roughness * Walnut::Random::InUnitSphere() * Walnut::Random::Float());
-		}
-		else if (material.type == Material::Type::Lmbert)
-		{
-			ray.Direction = payload.WorldNormal + Walnut::Random::InUnitSphere() * Walnut::Random::Float();
-		}
-
-
-		color += multiplier * material.Albedo * lightIntensity;
-		multiplier *= material.Metallic;
-		ray.Origin = payload.WorldPosition + 0.0001f * ray.Direction;
-
+		Scatter(ray, material, payload, color, multiplier);
 	}
 
 	return glm::vec4(color, 1.0f);
+}
+
+void Renderer::Scatter(Ray& ray, const Material& material, const HitPayload& payload, glm::vec3& color, float& multiplier)
+{
+	glm::vec3 lightDirection = -glm::normalize(glm::vec3(1));
+	float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -lightDirection), 0.0f);
+
+	if (material.type == Material::Type::Dielectric)
+	{
+		//color = glm::vec3(1);
+		glm::vec3 out_normal;
+		float Refraction;
+		float cosine = glm::dot(ray.Direction, payload.WorldNormal);
+		float prob;
+
+		//if (glm::distance(ray.Origin, payload.WorldPosition) > sphere.Radius)
+		if (cosine > 0.0f)
+		{
+			Refraction = material.RefractiveIndex;
+			out_normal = -payload.WorldNormal;
+			cosine *= Refraction;
+		}
+		else
+		{
+			Refraction = 1.0f / material.RefractiveIndex;
+			cosine *= -1;
+			out_normal = payload.WorldNormal;
+
+		}
+
+		glm::vec3 refractDir = glm::refract(ray.Direction, payload.WorldNormal, Refraction);
+
+		// Schlick Approximation
+		if (glm::length(refractDir) > 0)
+		{
+			float r = material.RefractiveIndex;
+			r = (1 - r) / (1 + r);
+			r *= r;
+			prob = r + (1 - r) * powf(1 - cosine, 5);
+		}
+		else
+			prob = 1.0f;
+
+		if (Walnut::Random::Float(0.0f, 1.0f) < prob)
+		{
+			ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal);
+			color += multiplier * material.Albedo * lightIntensity;
+		}
+		else
+			ray.Direction = refractDir;
+
+		ray.Origin = payload.WorldPosition + 0.0001f * ray.Direction;
+		return;
+
+	}
+	else if (material.type == Material::Type::Metal)
+	{
+		ray.Direction = glm::reflect(ray.Direction,
+			payload.WorldNormal + material.Roughness * Walnut::Random::InUnitSphere() * Walnut::Random::Float());
+	}
+	else if (material.type == Material::Type::Lmbert)
+	{
+		ray.Direction = payload.WorldNormal + Walnut::Random::InUnitSphere() * Walnut::Random::Float();
+	}
+
+
+	color += multiplier * material.Albedo * lightIntensity;
+	multiplier *= material.Metallic;
+	ray.Origin = payload.WorldPosition + 0.0001f * ray.Direction;
+
+	return;
+
 }
 
 Renderer::HitPayload  Renderer::TraceRay(const Ray& ray)
