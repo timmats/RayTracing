@@ -57,7 +57,7 @@ public:
 		}
 		if (ImGui::Button("CHAOS"))
 		{
-			Chaos(3, 100.0f);
+			Chaos(4, 100.0f);
 			m_Camera.setPosition(glm::vec3(0, 0, 400));
 		}
 
@@ -72,7 +72,7 @@ public:
 				Sphere sphere;
 				sphere.Dynamic = false;
 				sphere.MaterialIndex = 2;
-				sphere.Position = { 0.349f, 0.0f, -0.16f };
+				sphere.Position = { 0.0f, 0.0f, 0.0f };
 				m_Scene.AddSphere(sphere);
 			}
 		}
@@ -117,11 +117,10 @@ public:
 			ImGui::PushID(i);
 
 			Material& material = m_Scene.Materials[i];
-			ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 0.0f, 1.0f);
 			ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
 			ImGui::ColorEdit3("Albedo", glm::value_ptr(material.Albedo));
 
-			ImGui::DragInt("Type", &material.type, 0.1f, 0, 2);
+			ImGui::DragInt("Type", &material.type, 0.1f, 0, 3);
 			
 			ImGui::Separator();
 			ImGui::PopID();
@@ -181,7 +180,7 @@ public:
 					sphere.Position = scale * Walnut::Random::Vec3(-1, 1 );
 					//sphere.Position = { 0.349f, 0.0f, -0.16f };
 					//sphere.Radius = scale / (2 * N_spheres);
-					sphere.Radius = scale/10;
+					sphere.Radius = 5;
 					sphere.MaterialIndex = 2;
 					sphere.Dynamic = true;
 					m_Scene.AddSphere(sphere);
@@ -213,6 +212,11 @@ public:
 			DielectricSphere.Roughness = 0.0f;
 			DielectricSphere.type = Material::Type::Dielectric;
 
+			Material& EmissiveSphere = m_Scene.Materials.emplace_back();
+			EmissiveSphere.Albedo = { 10.0f, 10.0f, 10.0f };
+			EmissiveSphere.Roughness = 0.0f;
+			EmissiveSphere.type = Material::Type::Emissive;
+
 		}
 
 
@@ -226,9 +230,23 @@ public:
 
 		{
 			Sphere sphere;
-			sphere.Position = { 0.8f, 0.0f, 0.0f };
+			sphere.Position = { 0.0f, 0.0f, 0.0f };
 			sphere.Radius = 1.0f;
 			sphere.MaterialIndex = 0;
+			m_Scene.AddSphere(sphere);
+		}
+		{
+			Sphere sphere;
+			sphere.Position = { 2.2f, 0.0f, 0.0f };
+			sphere.Radius = 1.0f;
+			sphere.MaterialIndex = 2;
+			m_Scene.AddSphere(sphere);
+		}
+		{
+			Sphere sphere;
+			sphere.Position = { 2.0f, 2.0f, 2.0f };
+			sphere.Radius = 1.0f;
+			sphere.MaterialIndex = 3;
 			m_Scene.AddSphere(sphere);
 		}
 

@@ -8,12 +8,11 @@ struct Material
 {
 	enum Type
 	{
-		Lmbert = 0, Metal, Dielectric
+		Lmbert = 0, Metal, Dielectric, Emissive
 	};
 	int type = Type::Lmbert;
 	glm::vec3 Albedo{ 1.0f };
 	float Roughness = 0.0f;
-	float Metallic = 0.5f;
 	float RefractiveIndex = 1.5f;
 };
 

@@ -92,30 +92,38 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) //RayGen
 
 		if (payload.HitDistance < 0.0f)
 		{
-			// gradient background
-			float t = 0.5f * (ray.Direction.y + 1.0);
-			glm::vec3 skycolor = (1 - t) * glm::vec3(1.0f) + t * glm::vec3(0.6f, 0.7f, 0.9f);
-			color += skycolor * multiplier;
+			//// gradient background
+			//float t = 0.5f * (ray.Direction.y + 1.0);
+		/*	glm::vec3 skycolor = (1 - t) * glm::vec3(1.0f) + t * glm::vec3(0.6f, 0.7f, 0.9f);
+			skycolor = glm::vec3(0);*/
+			//color += skycolor * multiplier;
 			break;
 		}
 
-		// light source origin - sphere origin(= 0 bcz camera position is shifted)
-		glm::vec3 lightDirection = -glm::normalize(glm::vec3(1)); 
-		float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -lightDirection), 0.0f);
+		glm::vec3 lightDirection = -glm::normalize(glm::vec3(1));
+		float lightIntensity = 0.1f * glm::max(glm::dot(payload.WorldNormal, -lightDirection), 0.0f);
 
 		const Sphere& sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
 		const Material& material = m_ActiveScene->Materials[sphere.MaterialIndex];
 		
-		Scatter(ray, material, payload, color, multiplier);
+		if (material.type == Material::Type::Emissive)
+		{
+			color = material.Albedo;
+			break;
+		}
+		else
+		{
+			color += multiplier * lightIntensity * Scatter(ray, material, payload);
+			multiplier *= material.type == Material::Type::Dielectric? 1.0f : 0.5f;
+		}
 	}
 
 	return glm::vec4(color, 1.0f);
 }
 
-void Renderer::Scatter(Ray& ray, const Material& material, const HitPayload& payload, glm::vec3& color, float& multiplier)
+glm::vec3 Renderer::Scatter(Ray& ray, const Material& material, const HitPayload& payload)
 {
-	glm::vec3 lightDirection = -glm::normalize(glm::vec3(1));
-	float lightIntensity = glm::max(glm::dot(payload.WorldNormal, -lightDirection), 0.0f);
+	glm::vec3 attenuation = material.Albedo;
 
 	if (material.type == Material::Type::Dielectric)
 	{
@@ -137,14 +145,13 @@ void Renderer::Scatter(Ray& ray, const Material& material, const HitPayload& pay
 			Refraction = 1.0f / material.RefractiveIndex;
 			cosine *= -1;
 			out_normal = payload.WorldNormal;
-
 		}
 
 		glm::vec3 refractDir = glm::refract(ray.Direction, payload.WorldNormal, Refraction);
 
-		// Schlick Approximation
 		if (glm::length(refractDir) > 0)
 		{
+			// Schlick Approximation
 			float r = material.RefractiveIndex;
 			r = (1 - r) / (1 + r);
 			r *= r;
@@ -154,16 +161,11 @@ void Renderer::Scatter(Ray& ray, const Material& material, const HitPayload& pay
 			prob = 1.0f;
 
 		if (Walnut::Random::Float(0.0f, 1.0f) < prob)
-		{
 			ray.Direction = glm::reflect(ray.Direction, payload.WorldNormal);
-			color += multiplier * material.Albedo * lightIntensity;
-		}
 		else
 			ray.Direction = refractDir;
 
-		ray.Origin = payload.WorldPosition + 0.0001f * ray.Direction;
-		return;
-
+		attenuation = glm::vec3(0);
 	}
 	else if (material.type == Material::Type::Metal)
 	{
@@ -174,13 +176,10 @@ void Renderer::Scatter(Ray& ray, const Material& material, const HitPayload& pay
 	{
 		ray.Direction = payload.WorldNormal + Walnut::Random::InUnitSphere() * Walnut::Random::Float();
 	}
-
-
-	color += multiplier * material.Albedo * lightIntensity;
-	multiplier *= material.Metallic;
+	
 	ray.Origin = payload.WorldPosition + 0.0001f * ray.Direction;
 
-	return;
+	return attenuation;
 
 }
 
